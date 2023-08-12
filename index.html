@@ -17,6 +17,17 @@
       overflow: hidden;
     }
 
+    .imageview {
+      height: calc(100% - 30px);
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      height: 30px;
+      overflow: auto;
+    }
+
     .boxes {
       flex-basis: 30%;
     }
@@ -37,20 +48,98 @@
       .boxes {
         flex-basis: 100%;
       }
+      .imageview {
+        height: 90vh;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="viewer">
-      viewer
-      <image-cropper></image-cropper>
+      <div class="imageview">
+        <image-cropper hidefooter></image-cropper>
+        <img id="hiddenImg" style="display:none;"/>
+      </div>
+      <div class="actions">
+        <button>Previous</button>
+        <button>Next</button>
+      </div>
     </div>
     <div class="boxes">
       boxes
     </div>
   </div>
   <script>
+    let project;
+    let projectPath;
+    window.onload = function(){
+      downloadProject();
+    }
+
+    function downloadProject(){
+      projectPath = getUrlParam("project");
+      if (!projectPath) {
+        return;
+      }
+      const xhr = new XMLHttpRequest();
+      xhr.open('GET', projectPath);
+      xhr.onreadystatechange = function(){
+        if(xhr.readyState === 4){
+          loadProject(xhr.responseText);
+        }
+      }
+      xhr.onerror = function(){
+        console.log("error");
+      }
+      xhr.send();
+    }
+
+    function loadProject(str){
+      project = JSON.parse(str);
+      console.log(project);
+      let imageNames = Object.keys(project.images);
+      let firstImage = useWebPExtension(imageNames[0]);
+      loadImage(getParent(projectPath)+"/out/"+firstImage);
+    }
+
+    function useWebPExtension(filename){
+      filename = filename.replace(".jpg",".webp");
+      filename = filename.replace(".jpeg",".webp");
+      filename = filename.replace(".bmp",".webp");
+      filename = filename.replace(".png",".webp");
+      return filename;
+    }
+
+    function loadImage(src) {
+      let img = document.getElementById("hiddenImg");
+      img.onload = function(){
+        let cropper = document.querySelector("image-cropper");
+        cropper.img = img;
+      }
+      img.src = src;
+    }
+
+    /*
+    e.g. /project/1.itp => /project
+    */
+    function getParent(path){
+      let lastIndex;
+      lastIndex = path.lastIndexOf("/");
+      if (lastIndex === -1){
+        lastIndex = path.lastIndexOf("\\");
+      }
+      if (lastIndex != -1) {
+        return path.substring(0,lastIndex);
+      }
+      return path;
+    }
+
+    function getUrlParam(name) {
+      var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+      var r = window.location.search.substr(1).match(reg);
+      if (r != null) return unescape(r[2]); return null;
+    }
   </script>
 </body>
 </html>
