@@ -77,6 +77,7 @@
         <label for="translationModeCheckbox">
           Translated
         </label>
+        <span id="status" style="margin-left:2rem;"></span>
       </div>
     </div>
     <div class="boxes">
@@ -135,11 +136,13 @@
       }
       let img = document.createElement("img");
       img.onload = function(){
+        updateStatus("");
         let cropper = document.querySelector("image-cropper");
         cropper.img = img;
         cropper.shadowRoot.childNodes[0].style.background = "white";
         loadBoxes(imageName);
       }
+      updateStatus("Loading image...");
       img.src = path;
     }
 
@@ -210,6 +213,10 @@
         let boxContainer = buildBox(box,(index+1));
         boxesContainer.appendChild(boxContainer);
       }
+    }
+
+    function updateStatus(status){
+      document.getElementById("status").innerText = status;
     }
   </script>
 </body>
