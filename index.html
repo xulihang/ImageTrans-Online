@@ -30,8 +30,18 @@
 
     .boxes {
       flex-basis: 30%;
+      height: calc(100% - 30px);
+      overflow-y: auto;
     }
     
+    .box {
+      padding: 8px;
+    }
+
+    h5 {
+      margin: 0;
+    }
+
     .container {
       display: flex;
       height: 100vh;
@@ -70,7 +80,6 @@
       </div>
     </div>
     <div class="boxes">
-      boxes
     </div>
   </div>
   <script>
@@ -115,18 +124,21 @@
 
     function loadImage(index) {
       let imageNames = Object.keys(project.images);
-      let firstImage = useWebPExtension(imageNames[index]);
+      let imageName = imageNames[index];
+      let webpName = useWebPExtension(imageName)
       let isTranslation = document.getElementById("translationModeCheckbox").checked;
       let path;
       if (isTranslation === true) {
-        path = getParent(projectPath)+"/out/"+firstImage;
+        path = getParent(projectPath)+"/out/"+webpName;
       }else{
-        path = getParent(projectPath)+"/"+firstImage;
+        path = getParent(projectPath)+"/"+webpName;
       }
       let img = document.createElement("img");
       img.onload = function(){
         let cropper = document.querySelector("image-cropper");
         cropper.img = img;
+        cropper.shadowRoot.childNodes[0].style.background = "white";
+        loadBoxes(imageName);
       }
       img.src = path;
     }
@@ -172,6 +184,31 @@
       }else{
         currentIndex = currentIndex + 1;
         loadImage(currentIndex);
+      }
+    }
+
+    function buildBox(box,index){
+      let boxContainer = document.createElement("div");
+      boxContainer.className = "box";
+      let indexTitle = document.createElement("h5");
+      indexTitle.innerText = index;
+      let text =  document.createElement("div");
+      text.innerText = "Source: "+box.text + "\n" + "Target: "+box.target;
+      boxContainer.appendChild(indexTitle);
+      boxContainer.appendChild(text);
+      return boxContainer;
+    }
+
+    function loadBoxes(imageName){
+      let boxesContainer = document.getElementsByClassName("boxes")[0];
+      boxesContainer.innerHTML = "";
+      console.log(project.images);
+      console.log(imageName);
+      let image = project.images[imageName];
+      for (let index = 0; index < image.boxes.length; index++) {
+        const box = image.boxes[index];
+        let boxContainer = buildBox(box,(index+1));
+        boxesContainer.appendChild(boxContainer);
       }
     }
   </script>
