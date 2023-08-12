@@ -59,11 +59,14 @@
     <div class="viewer">
       <div class="imageview">
         <image-cropper hidefooter></image-cropper>
-        <img id="hiddenImg" style="display:none;"/>
       </div>
       <div class="actions">
         <button>Previous</button>
         <button>Next</button>
+        <input type="checkbox" id="translationModeCheckbox" checked onchange="onTranslationModeChange();"/>
+        <label for="translationModeCheckbox">
+          Translated
+        </label>
       </div>
     </div>
     <div class="boxes">
@@ -73,6 +76,7 @@
   <script>
     let project;
     let projectPath;
+    let currentIndex = 0;
     window.onload = function(){
       downloadProject();
     }
@@ -97,10 +101,8 @@
 
     function loadProject(str){
       project = JSON.parse(str);
-      console.log(project);
-      let imageNames = Object.keys(project.images);
-      let firstImage = useWebPExtension(imageNames[0]);
-      loadImage(getParent(projectPath)+"/out/"+firstImage);
+      currentIndex = 0;
+      loadImage(currentIndex,true);
     }
 
     function useWebPExtension(filename){
@@ -111,13 +113,21 @@
       return filename;
     }
 
-    function loadImage(src) {
-      let img = document.getElementById("hiddenImg");
+    function loadImage(index,isTranslation) {
+      let imageNames = Object.keys(project.images);
+      let firstImage = useWebPExtension(imageNames[index]);
+      let path;
+      if (isTranslation) {
+        path = getParent(projectPath)+"/out/"+firstImage;
+      }else{
+        path = getParent(projectPath)+"/"+firstImage;
+      }
+      let img = document.createElement("img");
       img.onload = function(){
         let cropper = document.querySelector("image-cropper");
         cropper.img = img;
       }
-      img.src = src;
+      img.src = path;
     }
 
     /*
@@ -139,6 +149,14 @@
       var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
       var r = window.location.search.substr(1).match(reg);
       if (r != null) return unescape(r[2]); return null;
+    }
+
+    function onTranslationModeChange(e){
+      if (document.getElementById("translationModeCheckbox").checked) {
+        loadImage(currentIndex,true);
+      }else{
+        loadImage(currentIndex,false);
+      }
     }
   </script>
 </body>
