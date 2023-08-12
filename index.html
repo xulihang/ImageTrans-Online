@@ -61,8 +61,8 @@
         <image-cropper hidefooter></image-cropper>
       </div>
       <div class="actions">
-        <button>Previous</button>
-        <button>Next</button>
+        <button onclick="prevImage();">Previous</button>
+        <button onclick="nextImage();">Next</button>
         <input type="checkbox" id="translationModeCheckbox" checked onchange="onTranslationModeChange();"/>
         <label for="translationModeCheckbox">
           Translated
@@ -102,7 +102,7 @@
     function loadProject(str){
       project = JSON.parse(str);
       currentIndex = 0;
-      loadImage(currentIndex,true);
+      loadImage(currentIndex);
     }
 
     function useWebPExtension(filename){
@@ -113,11 +113,12 @@
       return filename;
     }
 
-    function loadImage(index,isTranslation) {
+    function loadImage(index) {
       let imageNames = Object.keys(project.images);
       let firstImage = useWebPExtension(imageNames[index]);
+      let isTranslation = document.getElementById("translationModeCheckbox").checked;
       let path;
-      if (isTranslation) {
+      if (isTranslation === true) {
         path = getParent(projectPath)+"/out/"+firstImage;
       }else{
         path = getParent(projectPath)+"/"+firstImage;
@@ -152,10 +153,25 @@
     }
 
     function onTranslationModeChange(e){
-      if (document.getElementById("translationModeCheckbox").checked) {
-        loadImage(currentIndex,true);
+      loadImage(currentIndex);
+    }
+
+    function prevImage(){
+      if (currentIndex === 0) {
+        alert("This is the first image");
       }else{
-        loadImage(currentIndex,false);
+        currentIndex = currentIndex - 1;
+        loadImage(currentIndex);
+      }
+    }
+
+    function nextImage(){
+      let imageNames = Object.keys(project.images);
+      if (currentIndex === imageNames.length - 1) {
+        alert("This is the last image");
+      }else{
+        currentIndex = currentIndex + 1;
+        loadImage(currentIndex);
       }
     }
   </script>
